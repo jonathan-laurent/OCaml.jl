@@ -1,0 +1,18 @@
+(library
+ (name lib)
+ (public_name binding-julia)
+ (modules lib))
+
+(executable
+ (name CAPI)
+ (libraries binding-julia)
+ (foreign_stubs (language c) (names cstub))
+ (flags :standard -linkall)
+ (modes (native shared_object))
+ (modules CAPI))
+
+(install
+ (section lib)
+ (files
+  (CAPI.so as libbinding-julia.so)
+  (cstub.h as binding-julia.h)))
