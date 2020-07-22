@@ -20,6 +20,8 @@ value* __caml_of_bool__(int x);
 
 value* __caml_of_string__(char *str);
 
+value* __caml_make_unit__();
+
 // Custom API
 
 value* zero();

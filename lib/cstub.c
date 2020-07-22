@@ -37,6 +37,8 @@ value* __caml_of_long__(long x) { Alloc_return(Val_long(x)); }
 value* __caml_of_bool__(int x) { Alloc_return(Val_bool(x)); }
 value* __caml_of_string__(char *str) { Alloc_return(caml_copy_string(str)); }
 
+value* __caml_make_unit__() { Alloc_return(Val_unit); }
+
 // Custom API
 
 value* zero() {

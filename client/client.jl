@@ -32,6 +32,7 @@ struct CamlType0{name} <: CamlType end
 struct CamlType1{name, arg} <: CamlType end
 struct CamlType2{name, arg1, arg2} <: CamlType end
 
+const CamlUnit = CamlType0{:unit}
 const CamlInt = CamlType0{:int}
 const CamlBool = CamlType0{:bool}
 const CamlString = CamlType0{:string}
@@ -90,6 +91,10 @@ function Base.convert(::Type{CamlValue{CamlString}}, str::String)
   ptr = ccall((:__caml_of_string__, OCAML_LIB), Ptr{Cvoid}, (Cstring,), str)
   return CamlValue{CamlString}(ptr)
 end
+
+# unit
+
+const unit = CamlValue{CamlUnit}(ccall((:__caml_make_unit__, OCAML_LIB), Ptr{Cvoid}, ()))
 
 end
 
