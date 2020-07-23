@@ -5,6 +5,8 @@ export CamlType, CamlType0, CamlType1, CamlType2
 export CamlInt, CamlBool, CamlString, CamlArray
 export CamlValue
 
+export camlfun, camlconst
+
 # Mutable to ensure there is a finalizer
 mutable struct CamlValue{Type}
   ptr :: Ptr{Cvoid} # Pointer to an OCaml value
@@ -96,6 +98,60 @@ end
 
 const unit = CamlValue{CamlUnit}(ccall((:__caml_make_unit__, OCAML_LIB), Ptr{Cvoid}, ()))
 
+# Automatic generation
+
+ret_type(t) = CamlValue{t}
+ret_type(::Type{CamlInt}) = Int
+ret_type(::Type{CamlString}) = String
+ret_type(::Type{CamlBool}) = Bool
+
+arg_type(t) = CamlValue{t}
+arg_type(::Type{CamlInt}) = Int
+arg_type(::Type{CamlString}) = String
+arg_type(::Type{CamlBool}) = Bool
+
+function camlfun(name, args, ret)
+  @assert length(args) >= 1
+  args_names = [Symbol("x$i") for (i, _) in enumerate(args)]
+  # First generate the base function that nly takes CamlValues as inputs.
+  args_typed = [:($n :: CamlValue{$a}) for (n, a) in zip(args_names, args)]
+  main_def = quote
+    function $name($(args_typed...)) :: $(ret_type(ret))
+      ptr = ccall(
+        ($(QuoteNode(name)), OCAML_LIB),
+        Ptr{Cvoid},
+        ($([:(Ptr{Cvoid}) for _ in args]...),),
+        $([:($a.ptr) for a in args_names]...))
+      return CamlValue{$ret}(ptr)
+    end
+  end
+  # If at least one argument has a base type, generate a wrapper for convenience.
+  base_type(t) = !(arg_type(t) <: CamlValue)
+  conversion(n, t) = base_type(t) ? :(convert(CamlValue{$t}, $n)) : :($n) 
+  if any(base_type, args)
+    wargs_typed = [:($n :: $(arg_type(t))) for (n, t) in zip(args_names, args)]
+    converted = [conversion(n, t) for (n, t) in zip(args_names, args)]
+    wrapper_def = quote
+      $name($(wargs_typed...)) :: $(ret_type(ret)) = $name($(converted...))
+    end
+  else
+    wrapper_def = :()
+  end
+  return quote
+    $main_def
+    $wrapper_def
+  end
+end
+
+function camlconst(name, typ)
+  val = :(CamlValue{$typ}(ccall(($(QuoteNode(name)), OCAML_LIB), Ptr{Cvoid}, ())))
+  if ret_type(typ) <: CamlValue
+    return :(const $name = $val)
+  else
+    return :(const $name = convert($(ret_type(typ)), $val))
+  end
+end
+
 end
 
 using .CamlLib
@@ -120,26 +176,13 @@ end
 
 # Testing the Expr API
 
-const Expr = CamlValue{CamlType0{:expr}}
+const CamlExpr = CamlType0{:expr}
 
-function constant(x::CamlValue{CamlInt}) :: Expr
-  ptr = ccall((:constant, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), x.ptr)
-  return Expr(ptr)
-end
+camlfun(:constant, (CamlInt,), CamlExpr) |> eval
+camlfun(:add, (CamlExpr, CamlExpr), CamlExpr) |> eval
+camlfun(:evaluate, (CamlExpr,), CamlInt) |> eval
 
-constant(x::Integer) = constant(convert(CamlValue{CamlInt}, x))
-
-function add(x::Expr, y::Expr) :: Expr
-  ptr = ccall((:add, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}), x.ptr, y.ptr)
-  return Expr(ptr)
-end
-
-function evaluate(x::Expr) :: Int
-  ptr = ccall((:evaluate, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), x.ptr)
-  return CamlValue{CamlInt}(ptr)
-end
-
-const zero = Expr(ccall((:zero, OCAML_LIB), Ptr{Cvoid}, ()))
+camlconst(:zero, CamlExpr) |> eval
 
 @show evaluate(zero)
 @show evaluate(add(constant(1), constant(2)))
