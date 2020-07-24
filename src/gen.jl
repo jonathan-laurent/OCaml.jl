@@ -37,33 +37,36 @@ julia_type(t) = !isnothing(caml_of_julia(t))
 
 function from_caml(t, ptr)
   if caml_type(t)
+    t = esc(t)
     return :($t($ptr))
   else
     mlt = caml_of_julia(t)
     @assert !isnothing(mlt) "No Caml type registered for $t."
+    t = esc(t)
+    mlt = esc(mlt)
     return :(convert($t, $mlt($ptr)))
   end
 end
 
 function to_caml(t, caml)
   if caml_type(t)
-    return :($caml.ptr)
+    return esc(:($caml.ptr))
   else
     mlt = caml_of_julia(t)
     @assert !isnothing(mlt) "Cannot build a caml value from type $t."
-    return :(convert($mlt, $caml).ptr)
+    return esc(:(convert($mlt, $caml).ptr))
   end
 end
 
-function generate_function_wrapper(lib, name, args, ret)
+function generate_function_wrapper(lib, name, args, ret, whereargs)
   args = add_missing_names(args)
   return quote
-    function $(esc(name))($(esc.(args)...)) :: $(esc(ret))
+    function $(esc(name))($(esc.(args)...)) :: $(esc(ret)) where {$(esc.(whereargs)...)}
       ptr = ccall(
         ($(QuoteNode(name)), $(esc(lib))),
         Ptr{Cvoid},
         ($([:(Ptr{Cvoid}) for _ in args]...),),
-        $([esc(to_caml(a.args[2], a.args[1])) for a in args]...))
+        $([to_caml(a.args[2], a.args[1]) for a in args]...))
       return $(from_caml(ret, :ptr))
     end
   end
@@ -79,6 +82,12 @@ end
 function generate_wrapper(lib, e)
   @assert e.head == :(::)
   typ = e.args[2]
+  if !isa(typ, Symbol) && typ.head == :where
+    typ = typ.args[1]
+    whereargs = typ.args[2:end]
+  else
+    whereargs = []
+  end
   if isa(e.args[1], Symbol)
     # Constant definition
     name = e.args[1]
@@ -87,13 +96,11 @@ function generate_wrapper(lib, e)
     # Function definition
     name = e.args[1].args[1]
     args = e.args[1].args[2:end]
-    return generate_function_wrapper(lib, name, args, typ)
+    return generate_function_wrapper(lib, name, args, typ, whereargs)
   else
     error("Invalid use of @caml.")
   end
 end
-
-
 
 macro caml(lib, e)
   generate_wrapper(lib, e)

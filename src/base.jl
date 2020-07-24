@@ -2,14 +2,12 @@ import Libdl
 
 const OCAML_LIB = "libocaml"
 
-const OCAML_LIB_DIR = get(ENV, "OCAML_LIB_DIR", "")
-
-if OCAML_LIB_DIR == ""
-  error("You must specify the OCAML_LIB_DIR environment variable to use OCaml.")
-end
-
 function __init__()
-  push!(Libdl.DL_LOAD_PATH, OCAML_LIB_DIR)
+  libdir = get(ENV, "OCAML_LIB_DIR", "")
+  if isempty(libdir)
+    error("You must specify the OCAML_LIB_DIR environment variable to use OCaml.")
+  end
+  push!(Libdl.DL_LOAD_PATH, libdir)
   Libdl.dlopen("$OCAML_LIB.so")
   ccall((:caml_startup, OCAML_LIB), Cvoid, (Ptr{Ptr{Int8}},), [])
 end
