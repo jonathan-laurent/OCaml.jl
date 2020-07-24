@@ -1,0 +1,4 @@
+(executable
+  (name libocaml)
+  (libraries base lib)
+  (modes (native shared_object)))

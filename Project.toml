@@ -1,0 +1,7 @@
+name = "OCaml"
+uuid = "da46dbbd-bb07-4f7c-9c16-694dccb57c10"
+authors = ["Jonathan Laurent <jonathan.laurent@cs.cmu.edu>"]
+version = "0.1.0"
+
+[deps]
+Libdl = "8f399da3-3557-5675-b5ff-fb832c97cbdb"

@@ -5,8 +5,6 @@
 
 #include <stdio.h>
 
-// Dealing with OCaml's GC
-
 #define Alloc_return(res) ({\
   value *allocated = malloc(sizeof(value));\
   *allocated = (res);\
@@ -14,30 +12,7 @@
   return allocated;\
 })
 
-void __release__(value *obj) {
-  caml_remove_generational_global_root(obj);
-  free(obj);
-  // printf("Releasing %p\n", obj);
-}
-
-// Initialize the Ocaml runtime
-
-void __caml_initialize__ (char** argv) {
-  // printf("Initializing the OCaml environment.\n");
-  caml_startup(argv);
-}
-
-// Useful conversion functions
-
-long __long_of_caml__(value *v) { return Long_val(*v); }
-int __bool_of_caml__(value *v) { return Bool_val(*v); }
-const char* __string_of_caml__(value *v) { return String_val(*v); }
-
-value* __caml_of_long__(long x) { Alloc_return(Val_long(x)); }
-value* __caml_of_bool__(int x) { Alloc_return(Val_bool(x)); }
-value* __caml_of_string__(char *str) { Alloc_return(caml_copy_string(str)); }
-
-value* __caml_make_unit__() { Alloc_return(Val_unit); }
+void dummy_lib() { return; }
 
 // Custom API
 

@@ -1,0 +1,3 @@
+(library
+ (name lib)
+ (foreign_stubs (language c) (names lib)))
