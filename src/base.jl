@@ -23,6 +23,3 @@ mutable struct Caml{Type}
     return v
   end
 end
-
-# unit
-#const unit = Caml{:unit}(ccall((:__caml_make_unit__, OCAML_LIB), Ptr{Cvoid}, ()))

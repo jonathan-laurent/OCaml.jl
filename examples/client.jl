@@ -5,18 +5,18 @@ using OCaml
 
 # Testing the API
 
-# @caml zero :: Caml{:expr}
+@caml zero :: Caml{:expr}
 
-@macroexpand @caml evaluate(::Caml{:expr}) :: Int
+@caml evaluate(expr::Caml{:expr}) :: Caml{:int}
 
-@caml evaluate(::Caml{:expr}) :: Int
+@caml evaluate(::Caml{:expr}) :: Caml{:int}
 
-# @caml constant(::Int) :: Caml{:expr}
+@caml constant(::Caml{:int}) :: Caml{:expr}
 
-# @caml add(::Caml{:expr}, :: Caml{:expr}) :: Caml{:expr}
+@caml add(::Caml{:expr}, :: Caml{:expr}) :: Caml{:expr}
 
-# @show evaluate(zero)
+@show evaluate(zero)
 
-# @show evaluate(add(constant(1), constant(2)))
+@show evaluate(add(constant(1), constant(2)))
 
-# @macroexpand @caml get(::Caml{Tuple{:array, A}}, ::Int) :: Caml{A} where {A}
+@caml array_get(arr::Caml{Tuple{:array, A}}, index::Caml{:int}) :: Caml{A} where {A}

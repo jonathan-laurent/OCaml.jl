@@ -39,3 +39,24 @@ function Base.convert(::Type{Caml{:string}}, str::String)
   ptr = ccall((:caml_of_string, OCAML_LIB), Ptr{Cvoid}, (Cstring,), str)
   return Caml{:string}(ptr)
 end
+
+# Unit conversions
+
+function Base.convert(::Type{Nothing}, ::Caml{:unit})
+  return nothing
+end
+
+function Base.convert(::Type{Caml{:unit}}, ::Nothing)
+  return Caml{:unit}(ccall((:caml_make_unit, OCAML_LIB), Ptr{Cvoid}, ()))
+end
+
+
+# Canonical conversions
+
+tojulia(t::Type) = t
+tojulia(::Type{Caml{:unit}}) = Nothing
+tojulia(::Type{Caml{:int}}) = Int
+tojulia(::Type{Caml{:bool}}) = Bool
+tojulia(::Type{Caml{:string}}) = String
+
+tojulia(x) = convert(tojulia(typeof(x)), x)

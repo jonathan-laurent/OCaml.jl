@@ -22,60 +22,86 @@ end
 
 @assert add_missing_names([:(::Int), :(::String)]) == [:(x1::Int), :(x2::String)]
 
-caml_type(t) = !isa(t, Symbol) && t.head == :curly && t.args[1] == :Caml
-
-function caml_of_julia(t)
-  dict = Dict(:Int => :int, :Bool => :bool, :String => :string)
-  if haskey(dict, t)
-    return :(Caml{$(QuoteNode(dict[t]))})
+# Returns `args` if the given AST matches `Header{args...}` and `nothing` otherwise.
+function match_curly(header, ast)
+  if isa(ast, Expr) && ast.head == :curly && ast.args[1] == header
+    return ast.args[2:end]
   else
     return nothing
   end
 end
 
-julia_type(t) = !isnothing(caml_of_julia(t))
+# Returns `arg` if the givenAST matches `Caml{arg}` and `nothing` otherwise.
+function match_caml(t)
+  args = match_curly(:Caml, t)
+  isnothing(args) && return nothing
+  length(args) != 1 && return nothing
+  return args[1]
+end
 
-function from_caml(t, ptr)
-  if caml_type(t)
-    t = esc(t)
-    return :($t($ptr))
+# To call when a malformed type is passed to @caml
+invalid_type_error(t) = error("Invalid type passed to @caml: $t")
+
+# Check if an AST is an OCaml simple type such as :int or :string
+is_type_symbol(t) = isa(t, QuoteNode)
+
+# Also checks type well-formedness.
+function typexpr_contains_variable(t)
+  if isa(t, Symbol)
+    return true
+  elseif is_type_symbol(t)
+    return false
   else
-    mlt = caml_of_julia(t)
-    @assert !isnothing(mlt) "No Caml type registered for $t."
-    t = esc(t)
-    mlt = esc(mlt)
-    return :(convert($t, $mlt($ptr)))
+    args = match_curly(:Tuple, t)
+    isnothing(args) && invalid_type_error(t)
+    length(args) < 2 && invalid_type_error(t)
+    is_type_symbol(args[1]) || invalid_type_error(t)
+    return any(typexpr_contains_variable, args)    
   end
 end
 
-function to_caml(t, caml)
-  if caml_type(t)
-    return esc(:($caml.ptr))
+# Takes an AST expression of the form `:(arg :: type)` and returns whether
+# or not the type annot should be kept, which is the case if and only if
+# it contains a type variable.
+function annot_needed(a)
+  @assert a.head == :(::)
+  typ = a.args[2]
+  t = match_caml(typ)
+  isnothing(t) && invalid_type_error(typ)
+  return typexpr_contains_variable(t)
+end
+
+function escape_symbols(symbs, e)
+  if e ∈ symbs
+    return esc(e)
+  elseif isa(e, Expr)
+    return Expr(e.head, [escape_symbols(symbs, a) for a in e.args]...)
   else
-    mlt = caml_of_julia(t)
-    @assert !isnothing(mlt) "Cannot build a caml value from type $t."
-    return esc(:(convert($mlt, $caml).ptr))
+    return e
   end
 end
 
 function generate_function_wrapper(lib, name, args, ret, whereargs)
+  # We escape the generic type parameters to get nicer documentation
+  esctp(x) = escape_symbols(whereargs, x)
   args = add_missing_names(args)
+  cvoid(_) = :(Ptr{Cvoid})
+  funarg(a) = annot_needed(a) ? esctp(a) : a.args[1]
+  argptr(a) = :(convert($(a.args[2]), $(a.args[1])).ptr)
   return quote
-    function $(esc(name))($(esc.(args)...)) :: $(esc(ret)) where {$(esc.(whereargs)...)}
+    function $(esc(name))($(funarg.(args)...)) where {$(esc.(whereargs)...)}
       ptr = ccall(
-        ($(QuoteNode(name)), $(esc(lib))),
-        Ptr{Cvoid},
-        ($([:(Ptr{Cvoid}) for _ in args]...),),
-        $([to_caml(a.args[2], a.args[1]) for a in args]...))
-      return $(from_caml(ret, :ptr))
+        ($(QuoteNode(name)), $lib),
+        Ptr{Cvoid}, ($(cvoid.(args)...),), $(argptr.(args)...))
+      return tojulia($(esctp(ret))(ptr))
     end
   end
 end
 
 function generate_constant_wrapper(lib, name, typ)
-  val = :(ccall(($(QuoteNode(name)), $(esc(lib))), Ptr{Cvoid}, ()))
+  ptr = :(ccall(($(QuoteNode(name)), $lib), Ptr{Cvoid}, ()))
   return quote
-    const $(esc(name)) = $(from_caml(typ, val))
+    const $(esc(name)) = tojulia($typ($ptr))
   end
 end
 
@@ -102,8 +128,10 @@ function generate_wrapper(lib, e)
   end
 end
 
+# We escape the AST returned by the macro
+# Therefore, these macros should be used in a place where Caml is accessible.
 macro caml(lib, e)
-  generate_wrapper(lib, e)
+  return generate_wrapper(lib, e)
 end
 
 const CURRENT_LIB = Ref{String}(OCAML_LIB)
