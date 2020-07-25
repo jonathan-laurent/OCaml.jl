@@ -8,7 +8,7 @@ function __init__()
     error("You must specify the OCAML_LIB_DIR environment variable to use OCaml.")
   end
   push!(Libdl.DL_LOAD_PATH, libdir)
-  Libdl.dlopen("$OCAML_LIB.so")
+  Libdl.dlopen("$OCAML_LIB")
   ccall((:caml_startup, OCAML_LIB), Cvoid, (Ptr{Ptr{Int8}},), [])
 end
 
