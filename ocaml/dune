@@ -2,3 +2,5 @@
   (name libocaml)
   (libraries base lib)
   (modes (native shared_object)))
+
+(rule (copy libocaml.so libocaml.dylib))
