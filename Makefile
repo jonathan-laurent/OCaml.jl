@@ -12,7 +12,7 @@ lib:
 	dune build
 
 example:
-	$(CC) -I ocaml/base -I ocaml/lib \
+	$(CC) -I $(SO_PATH)/lib -I $(SO_PATH)/base \
 	    	-I $(OCAML_LIB_PATH) -L $(SO_PATH) \
 	    	-Wl,--no-as-needed -ldl -lm \
 				-locaml \

@@ -1,3 +1,8 @@
 (library
  (name lib)
  (foreign_stubs (language c) (names lib)))
+
+(rule
+  (targets lib.ml lib.c lib.h lib.jl)
+  (deps ../codegen/make_stubs.exe api.mli)
+  (action (run ../codegen/make_stubs.exe api.mli --name lib -jl lib.jl -h lib.h -c lib.c -ml lib.ml)))
