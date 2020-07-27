@@ -109,8 +109,8 @@ function generate_wrapper(lib, e)
   @assert e.head == :(::)
   typ = e.args[2]
   if !isa(typ, Symbol) && typ.head == :where
-    typ = typ.args[1]
     whereargs = typ.args[2:end]
+    typ = typ.args[1]
   else
     whereargs = []
   end
