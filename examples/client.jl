@@ -5,18 +5,10 @@ using OCaml
 
 # Testing the API
 
-@caml zero :: Caml{:expr}
+include("../_build/default/ocaml/lib/lib.jl")
 
-@caml evaluate(expr::Caml{:expr}) :: Caml{:int}
+expr = add(constant(1), constant(2))
 
-@caml evaluate(::Caml{:expr}) :: Caml{:int}
+@show evaluate(expr)
 
-@caml constant(::Caml{:int}) :: Caml{:expr}
-
-@caml add(::Caml{:expr}, :: Caml{:expr}) :: Caml{:expr}
-
-@show evaluate(zero)
-
-@show evaluate(add(constant(1), constant(2)))
-
-@caml array_get(arr::Caml{Tuple{:array, A}}, index::Caml{:int}) :: Caml{A} where {A}
+@show evaluate(array_get(sum_terms(expr), 2))

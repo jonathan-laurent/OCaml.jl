@@ -87,7 +87,7 @@ function generate_function_wrapper(lib, name, args, ret, whereargs)
   args = add_missing_names(args)
   cvoid(_) = :(Ptr{Cvoid})
   funarg(a) = annot_needed(a) ? esctp(a) : a.args[1]
-  argptr(a) = :(convert($(a.args[2]), $(a.args[1])).ptr)
+  argptr(a) = :(convert($(esctp(a.args[2])), $(a.args[1])).ptr)
   return quote
     function $(esc(name))($(funarg.(args)...)) where {$(esc.(whereargs)...)}
       ptr = ccall(

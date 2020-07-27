@@ -14,6 +14,17 @@
 
 void dummy_base() { return; }
 
+value caml_last_exception = NULL;
+
+const char *caml_last_exception_message() {
+  static const value *f = NULL;
+  if (f == NULL) f = caml_named_value("caml_exception_string");
+  if (caml_last_exception == NULL)
+    return "";
+  else
+    return String_val(caml_callback(*f, caml_last_exception));
+}
+
 void caml_release(value *obj) {
   caml_remove_generational_global_root(obj);
   free(obj);

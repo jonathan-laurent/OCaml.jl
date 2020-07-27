@@ -12,3 +12,13 @@ let rec evaluate = function
     Array.map evaluate xs |> Array.fold_left (+) 0
 
 let zero = Const 0
+
+let is_sum = function
+  | Add _ -> true
+  | _ -> false
+
+let sum_terms = function
+  | Add ts -> ts
+  | _ -> assert false
+
+let array_get arr i = arr.(i)

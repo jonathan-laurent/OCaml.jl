@@ -12,14 +12,25 @@ function __init__()
   ccall((:caml_startup, OCAML_LIB), Cvoid, (Ptr{Ptr{Int8}},), [])
 end
 
+struct CamlException <: Exception
+  msg :: String
+end
+
 # Mutable to ensure there is a finalizer
 mutable struct Caml{Type}
   ptr :: Ptr{Cvoid} # Pointer to an OCaml value
   function Caml{T}(ptr::Ptr{Cvoid}) where T
-    v = new{T}(ptr)
-    Base.finalizer(v) do v
-      ccall((:caml_release, OCAML_LIB), Cvoid, (Ptr{Cvoid},), v.ptr)
+    if ptr == C_NULL
+      # An exception must have occured, which is why the user ended up
+      # with a NULL value pointer.
+      err = ccall((:caml_last_exception_message, OCAML_LIB), Cstring, ())
+      throw(CamlException(unsafe_string(err)))
+    else
+      v = new{T}(ptr)
+      Base.finalizer(v) do v
+        ccall((:caml_release, OCAML_LIB), Cvoid, (Ptr{Cvoid},), v.ptr)
+      end
+      return v
     end
-    return v
   end
 end

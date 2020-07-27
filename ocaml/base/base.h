@@ -2,6 +2,12 @@
 
 #include <caml/mlvalues.h>
 
+// To store ocaml exceptions
+
+value caml_last_exception;
+
+const char* caml_last_exception_message();
+
 // For memory management
 
 void caml_release(value *obj);

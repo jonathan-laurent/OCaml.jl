@@ -56,7 +56,7 @@ let rec julia_type = function
   | Var a -> String.capitalize_ascii a
   | Type (t, []) -> ":" ^ t
   | Type (t, args) ->
-    "Tuple{:" ^ t ^ String.concat ", " (List.map julia_type args) ^ "}"
+    "Tuple{:" ^ t ^ ", " ^ String.concat ", " (List.map julia_type args) ^ "}"
 
 let julia_value_type t = "Caml{" ^ julia_type t ^ "}"
 
@@ -92,6 +92,8 @@ let write_c_source_prelude f libname =
   pp f "#include <caml/callback.h>\n";
   pp f "#include <caml/alloc.h>\n";
   pp f "#include <caml/memory.h>\n\n";
+  pp f "#include <stdio.h>\n\n"; (* for debugging *)
+  pp f "extern value caml_last_exception;";
   pp f "void dummy_%s() { return; }\n\n" libname
 
 let write_c_source_item f name {args; _} =
@@ -105,7 +107,7 @@ let write_c_source_item f name {args; _} =
     | [] -> "*_f"
     | _ ->
       let n = List.length arg_names in
-      Printf.sprintf "caml_callback%s(*_f, %s)"
+      Printf.sprintf "caml_callback%s_exn(*_f, %s)"
         (if n = 1 then "" else if n = 2 then "2" else if n = 3 then "3"
          else
            failwith "Functions with more than 3 arguments are currently not supported.")
@@ -116,8 +118,16 @@ let write_c_source_item f name {args; _} =
   pp f "  if (_f == NULL) _f = caml_named_value(\"%s\");\n" name;
   pp f "  value *_r = malloc(sizeof(value));\n";
   pp f "  *_r = %s;\n" res;
-  pp f "  caml_register_generational_global_root(_r);\n";
-  pp f "  return _r;\n";
+  pp f "  if (Is_exception_result(*_r)) {\n";
+  pp f "    caml_last_exception = Extract_exception(*_r);\n";
+  pp f "    caml_register_generational_global_root(&caml_last_exception);\n";
+  pp f "    free(_r);\n";
+  pp f "    return NULL;\n";
+  pp f "  }\n";
+  pp f "  else {\n";
+  pp f "    caml_register_generational_global_root(_r);\n";
+  pp f "    return _r;\n";
+  pp f "  }\n";
   pp f "}\n\n"
 
 let write_ml_prelude f libname =
