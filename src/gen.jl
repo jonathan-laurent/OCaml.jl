@@ -46,31 +46,44 @@ invalid_type_error(t) = error("Invalid type passed to @caml: $t")
 is_type_symbol(t) = isa(t, QuoteNode)
 
 # Also checks type well-formedness.
-function typexpr_contains_variable(t)
+function typexpr_variables(t)
   if isa(t, Symbol)
-    return true
+    return Set([t])
   elseif is_type_symbol(t)
-    return false
+    return Set()
   else
     args = match_curly(:Tuple, t)
     isnothing(args) && invalid_type_error(t)
     length(args) < 2 && invalid_type_error(t)
     is_type_symbol(args[1]) || invalid_type_error(t)
-    return any(typexpr_contains_variable, args)    
+    return union([typexpr_variables(a) for a in args]...)    
   end
 end
 
-# Takes an AST expression of the form `:(arg :: type)` and returns whether
-# or not the type annot should be kept, which is the case if and only if
-# it contains a type variable.
-function annot_needed(a)
+# Takes an AST expression of the form `:(arg :: type)` and returns
+# the set of 
+function typed_arg_variables(a)
   @assert a.head == :(::)
   typ = a.args[2]
   t = match_caml(typ)
   isnothing(t) && invalid_type_error(typ)
-  return typexpr_contains_variable(t)
+  return typexpr_variables(t)
 end
 
+# Filter the type annotations of a function's arguments such that:
+# - No type annotation is used for types that do not contain type typexpr_variables
+# - If a type variable A is used, the first type annotation mentioning A is kept
+function filter_type_annots(args)
+  seen = Set()
+  map(args) do a
+    vars = typed_arg_variables(a)
+    keep = !(vars ⊆ seen)
+    seen = seen ∪ vars
+    return keep ? a : a.args[1]
+  end
+end
+
+# Escape all the symbols that belong to `symbs` in `e`
 function escape_symbols(symbs, e)
   if e ∈ symbs
     return esc(e)
@@ -86,10 +99,10 @@ function generate_function_wrapper(lib, name, args, ret, whereargs)
   esctp(x) = escape_symbols(whereargs, x)
   args = add_missing_names(args)
   cvoid(_) = :(Ptr{Cvoid})
-  funarg(a) = annot_needed(a) ? esctp(a) : a.args[1]
   argptr(a) = :(convert($(esctp(a.args[2])), $(a.args[1])).ptr)
+  funargs = esctp.(filter_type_annots(args))
   return quote
-    function $(esc(name))($(funarg.(args)...)) where {$(esc.(whereargs)...)}
+    function $(esc(name))($(funargs...)) where {$(esc.(whereargs)...)}
       ptr = ccall(
         ($(QuoteNode(name)), $lib),
         Ptr{Cvoid}, ($(cvoid.(args)...),), $(argptr.(args)...))

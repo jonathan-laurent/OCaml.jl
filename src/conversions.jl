@@ -50,7 +50,6 @@ function Base.convert(::Type{Caml{:unit}}, ::Nothing)
   return Caml{:unit}(ccall((:caml_make_unit, OCAML_LIB), Ptr{Cvoid}, ()))
 end
 
-
 # Canonical conversions
 
 tojulia(t::Type) = t
