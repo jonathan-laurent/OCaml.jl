@@ -43,3 +43,9 @@ value* caml_of_bool(int x) { Alloc_return(Val_bool(x)); }
 value* caml_of_string(char *str) { Alloc_return(caml_copy_string(str)); }
 
 value* caml_make_unit() { Alloc_return(Val_unit); }
+
+value _deref_pointer_(char const *v) { return *((value*) v); }
+
+value* caml_base_make_array(char const ** elts) {
+  Alloc_return(caml_alloc_array(_deref_pointer_, elts));
+}

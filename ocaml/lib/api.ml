@@ -22,3 +22,13 @@ let sum_terms = function
   | _ -> assert false
 
 let array_get arr i = arr.(i)
+
+let array_length = Array.length
+
+let array_range n = Array.init n (fun x -> x)
+
+let array_set = Array.set
+
+let array_make = Array.make
+
+let array_sum = Array.fold_left (+) 0
