@@ -16,6 +16,11 @@ struct CamlException <: Exception
   msg :: String
 end
 
+function Base.showerror(io::IO, e::CamlException)
+  print(io, "OCaml Exception: ")
+  print(io, e.msg)
+end
+
 # Mutable to ensure there is a finalizer
 mutable struct Caml{Type}
   ptr :: Ptr{Cvoid} # Pointer to an OCaml value

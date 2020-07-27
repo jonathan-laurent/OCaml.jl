@@ -14,12 +14,12 @@
 
 void dummy_base() { return; }
 
-value caml_last_exception = NULL;
+value caml_last_exception = 0;
 
 const char *caml_last_exception_message() {
   static const value *f = NULL;
   if (f == NULL) f = caml_named_value("caml_exception_string");
-  if (caml_last_exception == NULL)
+  if (caml_last_exception == 0)
     return "";
   else
     return String_val(caml_callback(*f, caml_last_exception));

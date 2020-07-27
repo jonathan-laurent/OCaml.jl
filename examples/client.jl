@@ -11,4 +11,4 @@ expr = add(constant(1), constant(2))
 
 @show evaluate(expr)
 
-@show evaluate(array_get(sum_terms(expr), 2))
+evaluate(array_get(sum_terms(expr), 1))

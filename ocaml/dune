@@ -1,6 +1,7 @@
 (executable
   (name libocaml)
   (libraries base lib)
+  (flags (:standard -g))
   (modes (native shared_object)))
 
 (rule (copy libocaml.so libocaml.dylib))
