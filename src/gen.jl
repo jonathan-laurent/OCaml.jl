@@ -98,15 +98,19 @@ function generate_function_wrapper(lib, name, args, ret, whereargs)
   # We escape the generic type parameters to get nicer documentation
   esctp(x) = escape_symbols(whereargs, x)
   args = add_missing_names(args)
-  cvoid(_) = :(Ptr{Cvoid})
-  argptr(a) = :(convert($(esctp(a.args[2])), $(a.args[1])).ptr)
-  funargs = esctp.(filter_type_annots(args))
+  argsdecl = esctp.(filter_type_annots(args))
+  argnames = [a.args[1] for a in args]
+  argconvs = [:(convert($(esctp(a.args[2])), $(a.args[1]))) for a in args]
+  ptrtypes = [:(Ptr{Cvoid}) for _ in argnames]
+  ptrs = [:($x.ptr) for x in argnames]
+  cfun = :(($(QuoteNode(name)), $lib))
   return quote
-    function $(esc(name))($(funargs...)) where {$(esc.(whereargs)...)}
-      ptr = ccall(
-        ($(QuoteNode(name)), $lib),
-        Ptr{Cvoid}, ($(cvoid.(args)...),), $(argptr.(args)...))
-      return tojulia($(esctp(ret))(ptr))
+    function $(esc(name))($(argsdecl...)) where {$(esc.(whereargs)...)}
+      ($(argnames...),) = ($(argconvs...),)
+      GC.@preserve $(argnames...) begin
+        ptr = ccall($cfun, Ptr{Cvoid}, ($(ptrtypes...),), $(ptrs...))
+        return tojulia($(esctp(ret))(ptr))
+      end
     end
   end
 end
