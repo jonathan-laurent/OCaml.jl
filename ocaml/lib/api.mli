@@ -23,3 +23,5 @@ val array_set: 'a array -> int -> 'a -> unit
 val array_make: int -> 'a -> 'a array
 
 val array_sum: int array -> int
+
+val caml_run_gc: unit -> unit

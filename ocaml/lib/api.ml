@@ -32,3 +32,5 @@ let array_set = Array.set
 let array_make = Array.make
 
 let array_sum = Array.fold_left (+) 0
+
+let caml_run_gc = Gc.full_major
