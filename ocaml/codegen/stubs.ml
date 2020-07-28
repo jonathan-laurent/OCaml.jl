@@ -137,6 +137,45 @@ let write_ml_prelude f libname =
 let write_ml_item f name =
   pp f "  Callback.register \"%s\" Api.%s;\n" name name
 
+let get_attribute_docstring = function 
+  | { attr_name;
+      attr_payload =
+        PStr [{pstr_desc =
+         Pstr_eval ({pexp_desc =
+           Pexp_constant (Pconst_string (doc, _))
+              ; _}, _); _}]; _}
+    when attr_name.txt = "ocaml.doc" -> Some doc
+  | _ -> None
+
+let get_docstring vdescr =
+  vdescr.pval_attributes
+  |> List.filter_map get_attribute_docstring
+  |> String.concat "\n"
+  |> String.trim
+
+let convert_code_quote s =
+  let words = Str.split (Str.regexp "[ ]+") (Str.matched_group 1 s) in
+  let quote  s = "`" ^ s ^ "`" in
+  let parens s = "(" ^ s ^ ")" in
+  match words with
+  | [] -> ""
+  | [x] -> quote x
+  | f::args -> quote (f ^ parens (String.concat ", " args))
+
+let write_julia_doc f name coretype doc =
+  let typestr =
+    Format.asprintf "%a" Pprintast.core_type coretype
+    |> String.trim in
+  let doc =
+    Str.global_substitute
+      (Str.regexp "\\[\\([^][]*\\)\\]") convert_code_quote doc in
+  pp f "\"\"\"\n";
+  pp f "```ocaml\n";
+  pp f "val %s: %s\n" name typestr;
+  pp f "```\n";
+  if String.length doc > 0 then pp f "%s\n" doc;
+  pp f "\"\"\"\n"
+
 let make ~name ~h ~c ~jl ~ml s =
   let abstract_types = Queue.create () in
   write_c_header_prelude h;
@@ -149,6 +188,8 @@ let make ~name ~h ~c ~jl ~ml s =
       begin
         let name = v.pval_name.txt in
         let typ = convert_type ~loc v.pval_type in
+        let doc = get_docstring v in
+        write_julia_doc jl name v.pval_type doc;
         write_julia_stub_item jl name typ;
         write_c_header_item h name typ;
         write_c_source_item c name typ;
