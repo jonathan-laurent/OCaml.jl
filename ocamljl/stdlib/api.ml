@@ -26,4 +26,10 @@ let triple_snd (_, y, _) = y
 
 let triple_trd (_, _, z) = z
 
+let some x = Some x
+
+let is_none = function None -> true | Some _ -> false
+
+let get_some = function Some x -> x | None -> assert false
+
 let run_gc = Gc.full_major

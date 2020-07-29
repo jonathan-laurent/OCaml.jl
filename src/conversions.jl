@@ -152,6 +152,20 @@ function Base.convert(
   return x, y, z 
 end
 
+# Options
+
+function Base.convert(::Type{CamlOption{T}}, ::Nothing) where {T}
+  # None and () have the ame representation in OCaml
+  return Caml{:unit}(ccall((:caml_make_unit, OCAML_LIB), Ptr{Cvoid}, ()))
+end
+
+function Base.convert(::Type{CamlOption{T}}, x) where {T}
+  x = convert(Caml{T}, x)
+  return CamlOption{T}(ccall((:some, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), x.ptr))
+end
+
+Base.convert(::Type{CamlOption{T}}, x::CamlOption{T}) where {T} = x
+
 # Canonical conversions
 
 tojulia(t::Type) = t
@@ -172,3 +186,6 @@ tojulia(::Type{CamlList{A}}) where A = Vector{tojulia(Caml{A})}
 tojulia(::Type{CamlPair{A, B}}) where {A, B} = Tuple{tojulia(Caml{A}), tojulia(Caml{B})}
 
 tojulia(::Type{CamlTriple{A, B, C}}) where {A, B, C} = Tuple{tojulia(Caml{A}), tojulia(Caml{B}), tojulia(Caml{C})}
+
+# For options, we introduce a type instability
+tojulia(x::CamlOption) = is_none(x) ? nothing : get_some(x)

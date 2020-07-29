@@ -24,3 +24,11 @@ include("../_build/default/examples/libocaml/ocamljl_examples.jl")
 @show point2i_add((1, 2), (2, 1))
 
 @show point3f_add((1, 2, 0), (2, 1, -3))
+
+@show add_opt(1, nothing)
+
+@show add_opt(1, 2)
+
+@show safe_div(1, 0)
+
+@show safe_div(1, 2)

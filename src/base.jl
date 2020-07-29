@@ -44,6 +44,8 @@ const CamlArray{T} = Caml{Tuple{:array, T}}
 
 const CamlList{T} = Caml{Tuple{:list, T}}
 
+const CamlOption{T} = Caml{Tuple{:option, T}}
+
 const CamlPair{A, B} = Caml{Tuple{:tuple, A, B}}
 
 const CamlTriple{A, B, C} = Caml{Tuple{:tuple, A, B, C}}

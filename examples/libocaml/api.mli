@@ -30,3 +30,7 @@ val vec_mul: float -> float array -> float array
 val point2i_add: int * int -> int * int -> int * int
 
 val point3f_add: float * float * float -> float * float * float -> float * float * float
+
+val add_opt: int option -> int option -> int
+
+val safe_div: float -> float -> float option
