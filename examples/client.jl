@@ -20,3 +20,7 @@ include("../_build/default/examples/libocaml/ocamljl_examples.jl")
 @show vec_mul(2.0, [1.5, 0.5])
 
 @show vec_mul(0, [1.5, 0.5])
+
+@show point2i_add((1, 2), (2, 1))
+
+@show point3f_add((1, 2, 0), (2, 1, -3))

@@ -26,3 +26,7 @@ val square_float: float -> float
 val array_maximum: float array -> float
 
 val vec_mul: float -> float array -> float array
+
+val point2i_add: int * int -> int * int -> int * int
+
+val point3f_add: float * float * float -> float * float * float -> float * float * float

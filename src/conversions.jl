@@ -111,6 +111,47 @@ function Base.convert(::Type{CamlList{A}}, x::Vector) where {A}
   return CamlList{A}(ptr)
 end
 
+# Pair conversions
+
+function Base.convert(::Type{CamlPair{A, B}}, (x, y)::Tuple{X, Y}) where {A, B, X, Y}
+  x = convert(Caml{A}, x)
+  y = convert(Caml{B}, y)
+  ptr = ccall((:make_pair, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid}, Ptr{Cvoid}), x.ptr, y.ptr)
+  return CamlPair{A, B}(ptr)
+end
+
+function Base.convert(::Type{Tuple{X, Y}}, p::CamlPair{A, B}) where {A, B, X, Y}
+  ptrx = ccall((:pair_fst, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), p.ptr)
+  ptry = ccall((:pair_snd, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), p.ptr)
+  x = convert(X, Caml{A}(ptrx))
+  y = convert(Y, Caml{B}(ptry))
+  return x, y 
+end
+
+# Triple conversions
+
+function Base.convert(
+    ::Type{CamlTriple{A, B, C}}, (x, y, z)::Tuple{X, Y, Z}) where {A, B, C, X, Y, Z}
+  x = convert(Caml{A}, x)
+  y = convert(Caml{B}, y)
+  z = convert(Caml{C}, z)
+  ptr = ccall(
+    (:make_triple, OCAML_LIB), Ptr{Cvoid},
+    (Ptr{Cvoid}, Ptr{Cvoid}, Ptr{Cvoid}), x.ptr, y.ptr, z.ptr)
+  return CamlTriple{A, B, C}(ptr)
+end
+
+function Base.convert(
+    ::Type{Tuple{X, Y, Z}}, t::CamlTriple{A, B, C}) where {A, B, C, X, Y, Z}
+  ptrx = ccall((:triple_fst, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), t.ptr)
+  ptry = ccall((:triple_snd, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), t.ptr)
+  ptrz = ccall((:triple_trd, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), t.ptr)
+  x = convert(X, Caml{A}(ptrx))
+  y = convert(Y, Caml{B}(ptry))
+  z = convert(Y, Caml{C}(ptrz))
+  return x, y, z 
+end
+
 # Canonical conversions
 
 tojulia(t::Type) = t
@@ -125,4 +166,9 @@ tojulia(x) = convert(tojulia(typeof(x)), x)
 # More advanced conversions that you may want to disable
 
 tojulia(::Type{CamlArray{A}}) where A = Vector{tojulia(Caml{A})}
-tojulia(::Type{CamlList{A}})  where A = Vector{tojulia(Caml{A})}
+
+tojulia(::Type{CamlList{A}}) where A = Vector{tojulia(Caml{A})}
+
+tojulia(::Type{CamlPair{A, B}}) where {A, B} = Tuple{tojulia(Caml{A}), tojulia(Caml{B})}
+
+tojulia(::Type{CamlTriple{A, B, C}}) where {A, B, C} = Tuple{tojulia(Caml{A}), tojulia(Caml{B}), tojulia(Caml{C})}

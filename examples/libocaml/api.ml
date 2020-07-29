@@ -30,3 +30,7 @@ let square_float x = x *. x
 let array_maximum = Array.fold_left Float.max Float.neg_infinity
 
 let vec_mul lam = Array.map (fun x -> lam *. x)
+
+let point2i_add (x, y) (x', y') = (x + x', y + y')
+
+let point3f_add (x, y, z) (x', y', z') = (x +. x', y +. y', z +. z')

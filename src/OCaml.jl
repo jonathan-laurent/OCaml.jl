@@ -1,6 +1,7 @@
 module OCaml
 
-  export Caml, CamlArray, CamlList, CamlException, @caml
+  export Caml, CamlException, @caml
+  export CamlArray, CamlList, CamlPair, CamlTriple
 
   include("base.jl")
   include("conversions.jl")
