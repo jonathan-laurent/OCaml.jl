@@ -12,7 +12,7 @@
   return allocated;\
 })
 
-void dummy_base() { return; }
+void dummy_ocamljl_base() { return; }
 
 value caml_last_exception = 0;
 

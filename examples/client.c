@@ -1,6 +1,7 @@
 #include <stdio.h>
-#include <base.h>
-#include <lib.h>
+#include <ocamljl_base.h>
+#include <ocamljl_stdlib.h>
+#include <ocamljl_examples.h>
 
 #include <caml/mlvalues.h>
 #include <caml/callback.h>

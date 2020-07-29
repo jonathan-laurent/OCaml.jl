@@ -1,0 +1,23 @@
+(executable
+  (name libocaml)
+  (libraries ocamljl_base ocamljl_stdlib)
+  (foreign_stubs (language c) (names ocamljl_examples))
+  (flags (:standard -g))
+  (modes (native shared_object)))
+
+(rule (copy libocaml.so libocaml.dylib))
+
+(rule
+  (targets
+    ocamljl_examples.ml
+    ocamljl_examples.c
+    ocamljl_examples.h
+    ocamljl_examples.jl)
+  (deps ../../ocamljl/codegen/make_stubs.exe api.mli)
+  (action
+    (run ../../ocamljl/codegen/make_stubs.exe api.mli 
+      --name ocamljl_examples
+      -jl ocamljl_examples.jl
+      -h ocamljl_examples.h
+      -c ocamljl_examples.c
+      -ml ocamljl_examples.ml)))

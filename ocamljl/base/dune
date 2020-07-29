@@ -1,0 +1,3 @@
+(library
+ (name ocamljl_base)
+ (foreign_stubs (language c) (names ocamljl_base)))

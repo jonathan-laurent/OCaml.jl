@@ -1,4 +1,4 @@
-# Caml.jl
+# OCaml.jl
 
 A package to make OCaml libraries available in Julia.
 

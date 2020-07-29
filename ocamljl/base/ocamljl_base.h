@@ -2,7 +2,7 @@
 
 #include <caml/mlvalues.h>
 
-// To store ocaml exceptions
+// To handle ocaml exceptions
 
 value caml_last_exception;
 

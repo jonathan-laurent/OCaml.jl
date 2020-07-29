@@ -93,7 +93,7 @@ let write_c_source_prelude f libname =
   pp f "#include <caml/alloc.h>\n";
   pp f "#include <caml/memory.h>\n\n";
   pp f "#include <stdio.h>\n\n"; (* for debugging *)
-  pp f "extern value caml_last_exception;";
+  pp f "extern value caml_last_exception;\n\n";
   pp f "void dummy_%s() { return; }\n\n" libname
 
 let write_c_source_item f name {args; _} =

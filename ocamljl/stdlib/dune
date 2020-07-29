@@ -1,0 +1,18 @@
+(library
+ (name ocamljl_stdlib)
+ (foreign_stubs (language c) (names ocamljl_stdlib)))
+
+(rule
+  (targets
+    ocamljl_stdlib.ml
+    ocamljl_stdlib.c
+    ocamljl_stdlib.h
+    ocamljl_stdlib.jl)
+  (deps ../codegen/make_stubs.exe api.mli)
+  (action
+    (run ../codegen/make_stubs.exe api.mli 
+      --name ocamljl_stdlib
+      -jl ocamljl_stdlib.jl
+      -h ocamljl_stdlib.h
+      -c ocamljl_stdlib.c
+      -ml ocamljl_stdlib.ml)))

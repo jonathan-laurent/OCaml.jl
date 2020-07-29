@@ -1,4 +1,4 @@
-external dummy: unit -> unit = "dummy_base"
+external dummy: unit -> unit = "dummy_ocamljl_base"
 
 let caml_exception_string e =
   let msg = Printexc.to_string e
