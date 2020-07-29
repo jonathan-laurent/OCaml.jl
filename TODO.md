@@ -2,7 +2,6 @@
 
 - Handle special case of float arrays
 - Add support for tuples
-- Add support for floats (convert to and from)
 - Add conversion functions for lists
 - What should we do for option? Should we convert the result to Union{T, Nothing}?
 - Write documentation

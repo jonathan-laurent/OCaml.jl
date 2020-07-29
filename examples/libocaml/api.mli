@@ -19,4 +19,6 @@ val sum_terms: expr -> expr array
 
 val array_sum: int array -> int
 
+val list_sum: int list -> int
+
 val square_float: float -> float

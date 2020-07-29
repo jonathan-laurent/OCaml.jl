@@ -23,4 +23,6 @@ let sum_terms = function
 
 let array_sum = Array.fold_left (+) 0
 
+let list_sum = List.fold_left (+) 0
+
 let square_float x = x *. x

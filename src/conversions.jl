@@ -69,6 +69,38 @@ function Base.convert(::Type{Caml{:unit}}, ::Nothing)
   return Caml{:unit}(ccall((:caml_make_unit, OCAML_LIB), Ptr{Cvoid}, ()))
 end
 
+# Array conversions
+
+function Base.convert(::Type{<:Vector}, arr::CamlArray{A}) where A
+  n = array_length(arr)
+  Eltype = tojulia(Caml{A})
+  return Eltype[convert(Eltype, array_get(arr, i)) for i in 0:(n-1)]
+end
+
+function Base.convert(::Type{CamlArray{A}}, arr::Vector) where A
+  values = [convert(Caml{A}, x) for x in arr]
+  GC.@preserve values begin
+    ptrs = Ptr{Cchar}[v.ptr for v in values]
+    push!(ptrs, C_NULL)
+    @assert isa(ptrs, Vector{Ptr{Cchar}})
+    ptr = ccall((:caml_base_make_array, OCAML_LIB), Ptr{Cvoid}, (Ptr{Ptr{Cchar}},), ptrs)
+    return CamlArray{A}(ptr)
+  end
+end
+
+# List conversions
+
+function Base.convert(T::Type{<:Vector}, l::CamlList{A}) where {A}
+  ptr = ccall((:array_of_list, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), l.ptr)
+  return convert(T, CamlArray{A}(ptr))
+end
+
+function Base.convert(::Type{CamlList{A}}, x::Vector) where {A}
+  arr = convert(CamlArray{A}, x)
+  ptr = ccall((:list_of_array, OCAML_LIB), Ptr{Cvoid}, (Ptr{Cvoid},), arr.ptr)
+  return CamlList{A}(ptr)
+end
+
 # Canonical conversions
 
 tojulia(t::Type) = t
@@ -80,23 +112,7 @@ tojulia(::Type{Caml{:string}}) = String
 
 tojulia(x) = convert(tojulia(typeof(x)), x)
 
-# Array conversions
+# More advanced conversions that you may want to disable
 
-tojulia(::Type{Caml{Tuple{:array, A}}}) where A = Vector{tojulia(Caml{A})}
-
-function Base.convert(::Type{<:Vector}, arr::Caml{Tuple{:array, A}}) where A
-  n = array_length(arr)
-  Eltype = tojulia(Caml{A})
-  return Eltype[convert(Eltype, array_get(arr, i)) for i in 0:(n-1)]
-end
-
-function Base.convert(::Type{Caml{Tuple{:array, A}}}, arr::Vector) where A
-  values = [convert(Caml{A}, x) for x in arr]
-  GC.@preserve values begin
-    ptrs = Ptr{Cchar}[v.ptr for v in values]
-    push!(ptrs, C_NULL)
-    @assert isa(ptrs, Vector{Ptr{Cchar}})
-    ptr = ccall((:caml_base_make_array, OCAML_LIB), Ptr{Cvoid}, (Ptr{Ptr{Cchar}},), ptrs)
-    return Caml{Tuple{:array, A}}(ptr)
-  end
-end
+tojulia(::Type{CamlArray{A}}) where A = Vector{tojulia(Caml{A})}
+tojulia(::Type{CamlList{A}})  where A = Vector{tojulia(Caml{A})}

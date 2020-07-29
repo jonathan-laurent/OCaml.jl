@@ -9,4 +9,6 @@ include("../_build/default/examples/libocaml/ocamljl_examples.jl")
 
 @show array_sum([1, 2, 3])
 
+@show list_sum(collect(1:10))
+
 @show square_float(2.0)
