@@ -5,10 +5,6 @@ using OCaml
 
 include("../_build/default/examples/libocaml/ocamljl_examples.jl")
 
-expr = add(constant(1), constant(2))
+@show evaluate(add(constant(1), constant(2)))
 
-@show evaluate(expr)
-
-using BenchmarkTools
-
-@btime array_sum([1, 2, 3])
+@show array_sum([1, 2, 3])
