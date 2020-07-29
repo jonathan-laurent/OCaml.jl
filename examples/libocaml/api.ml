@@ -26,3 +26,7 @@ let array_sum = Array.fold_left (+) 0
 let list_sum = List.fold_left (+) 0
 
 let square_float x = x *. x
+
+let array_maximum = Array.fold_left Float.max Float.neg_infinity
+
+let vec_mul lam = Array.map (fun x -> lam *. x)

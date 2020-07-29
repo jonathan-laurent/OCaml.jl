@@ -33,3 +33,5 @@ value* caml_of_string(char *str);
 value* caml_make_unit();
 
 value* caml_base_make_array(value **elts);
+
+value* caml_base_make_double_array(int n, double *src);

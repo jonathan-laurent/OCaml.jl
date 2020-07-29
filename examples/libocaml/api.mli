@@ -22,3 +22,7 @@ val array_sum: int array -> int
 val list_sum: int list -> int
 
 val square_float: float -> float
+
+val array_maximum: float array -> float
+
+val vec_mul: float -> float array -> float array

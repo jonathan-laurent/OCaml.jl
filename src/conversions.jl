@@ -43,7 +43,7 @@ function Base.convert(::Type{T}, x::Caml{:float}) where {T <: AbstractFloat}
   return convert(T, convert(Cdouble, x))
 end
 
-function Base.convert(::Type{Caml{:float}}, x::AbstractFloat)
+function Base.convert(::Type{Caml{:float}}, x::Number)
   return convert(Caml{:float}, convert(Cdouble, x))
 end
 
@@ -78,6 +78,7 @@ function Base.convert(::Type{<:Vector}, arr::CamlArray{A}) where A
 end
 
 function Base.convert(::Type{CamlArray{A}}, arr::Vector) where A
+  @assert A != :float
   values = [convert(Caml{A}, x) for x in arr]
   GC.@preserve values begin
     ptrs = Ptr{Cchar}[v.ptr for v in values]
@@ -86,6 +87,15 @@ function Base.convert(::Type{CamlArray{A}}, arr::Vector) where A
     ptr = ccall((:caml_base_make_array, OCAML_LIB), Ptr{Cvoid}, (Ptr{Ptr{Cchar}},), ptrs)
     return CamlArray{A}(ptr)
   end
+end
+
+# Special case of float arrays
+function Base.convert(::Type{CamlArray{:float}}, arr::Vector)
+  arr = convert(Vector{Cdouble}, arr)
+  ptr = ccall(
+    (:caml_base_make_double_array, OCAML_LIB),
+    Ptr{Cvoid}, (Cint, Ptr{Cdouble}), length(arr), arr)
+  return CamlArray{:float}(ptr)
 end
 
 # List conversions

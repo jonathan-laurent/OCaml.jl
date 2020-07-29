@@ -53,3 +53,9 @@ value _deref_pointer_(char const *v) { return *((value*) v); }
 value* caml_base_make_array(char const ** elts) {
   Alloc_return(caml_alloc_array(_deref_pointer_, elts));
 }
+
+value* caml_base_make_double_array(int n, double *src) {
+  value arr = caml_alloc_float_array(n);
+  for(int i = 0; i < n; i++) Store_double_field(arr, i, src[i]);
+  Alloc_return(arr);
+}
