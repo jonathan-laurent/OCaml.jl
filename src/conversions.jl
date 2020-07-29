@@ -28,6 +28,25 @@ function Base.convert(::Type{Caml{:bool}}, b::Bool)
   return Caml{:bool}(ptr)
 end
 
+# Float conversions
+
+function Base.convert(::Type{Cdouble}, v::Caml{:float})
+  return ccall((:caml_to_double, OCAML_LIB), Cdouble, (Ptr{Cvoid},), v.ptr)
+end
+
+function Base.convert(::Type{Caml{:float}}, x::Cdouble)
+  ptr = ccall((:caml_of_double, OCAML_LIB), Ptr{Cvoid}, (Cdouble,), x)
+  return Caml{:float}(ptr)
+end
+
+function Base.convert(::Type{T}, x::Caml{:float}) where {T <: AbstractFloat}
+  return convert(T, convert(Cdouble, x))
+end
+
+function Base.convert(::Type{Caml{:float}}, x::AbstractFloat)
+  return convert(Caml{:float}, convert(Cdouble, x))
+end
+
 # String conversions
 
 function Base.convert(::Type{String}, v::Caml{:string})
@@ -56,6 +75,7 @@ tojulia(t::Type) = t
 tojulia(::Type{Caml{:unit}}) = Nothing
 tojulia(::Type{Caml{:int}}) = Int
 tojulia(::Type{Caml{:bool}}) = Bool
+tojulia(::Type{Caml{:float}}) = Float64
 tojulia(::Type{Caml{:string}}) = String
 
 tojulia(x) = convert(tojulia(typeof(x)), x)

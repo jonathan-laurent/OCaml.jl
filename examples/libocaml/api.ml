@@ -22,3 +22,5 @@ let sum_terms = function
   | _ -> assert false
 
 let array_sum = Array.fold_left (+) 0
+
+let square_float x = x *. x

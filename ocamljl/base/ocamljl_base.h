@@ -18,11 +18,15 @@ long caml_to_long(value *v);
 
 int caml_to_bool(value *v);
 
+double caml_to_double(value *v);
+
 const char* caml_to_string(value *v);
 
 value* caml_of_long(long x);
 
 value* caml_of_bool(int x);
+
+value* caml_of_double(double x);
 
 value* caml_of_string(char *str);
 

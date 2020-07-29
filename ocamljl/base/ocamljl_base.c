@@ -34,11 +34,15 @@ long caml_to_long(value *v) { return Long_val(*v); }
 
 int caml_to_bool(value *v) { return Bool_val(*v); }
 
+double caml_to_double(value *v) { return Double_val(*v); }
+
 const char* caml_to_string(value *v) { return String_val(*v); }
 
 value* caml_of_long(long x) { Alloc_return(Val_long(x)); }
 
 value* caml_of_bool(int x) { Alloc_return(Val_bool(x)); }
+
+value* caml_of_double(double x) { Alloc_return(caml_copy_double(x)); }
 
 value* caml_of_string(char *str) { Alloc_return(caml_copy_string(str)); }
 
