@@ -1,6 +1,6 @@
 OCAML_LIB_PATH=$(shell ocamlopt -where)
 DUNE_BUILD_PATH=_build/default
-GENERATED_PATH=examples/generated
+GENERATED_PATH=generated
 
 .PHONY: lib testc testjl clean
 

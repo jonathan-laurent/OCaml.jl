@@ -1,2 +1,2 @@
 # TODO: maybe `make lib` should modify this file directly?
-include("../examples/generated/ocamljl_stdlib.jl")
+include("../generated/ocamljl_stdlib.jl")

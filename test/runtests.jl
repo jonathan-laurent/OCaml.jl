@@ -1,10 +1,10 @@
 using Test
 
-ENV["OCAML_LIB_DIR"] = "../examples/generated"
+ENV["OCAML_LIB_DIR"] = "../generated"
 
 using OCaml
 
-include("../examples/generated/ocamljl_examples.jl")
+include("../generated/ocamljl_examples.jl")
 
 @test evaluate(add(constant(1), constant(2))) == 3
 
