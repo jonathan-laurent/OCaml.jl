@@ -3,8 +3,8 @@
 [![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://jonathan-laurent.github.io/OCaml.jl/dev)
 [![Build Status](https://travis-ci.org/jonathan-laurent/OCaml.jl.svg?branch=master)](https://travis-ci.org/jonathan-laurent/OCaml.jl)
 
-This package enables you to generate Julia bindings for OCaml libraries without
-writing a single line of boilerplate.
+This package enables you to generate Julia bindings for OCaml libraries with
+no boilerplate.
 
 ## How to build the example
 
