@@ -21,7 +21,6 @@ val evaluate: expr -> int
 
 From this signature, the following C wrapper is generated automatically:
 
-_build/default/examples/libocaml/ocamljl_examples.c:_
 ```c
 value* evaluate(value *x0) {
   static const value *_f = NULL;
@@ -43,7 +42,6 @@ value* evaluate(value *x0) {
 
 Also, the following Julia stub is generated:
 
-_build/default/examples/libocaml/ocamljl_examples.jl:_
 ```julia
 @caml evaluate(::Caml{:expr}) :: Caml{:int}
 ```
