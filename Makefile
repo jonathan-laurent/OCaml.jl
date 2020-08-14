@@ -1,15 +1,7 @@
+OS=$(shell uname)
 OCAML_LIB_PATH=$(shell ocamlopt -where)
 DUNE_BUILD_PATH=_build/default
 GENERATED_PATH=generated
-
-OS=$(shell uname)
-
-ifeq ($(UNAME), Linux)
-# do something Linux-y
-endif
-ifeq ($(UNAME), Solaris)
-# do something Solaris-y
-endif
 
 .PHONY: lib testc testjl clean
 
@@ -21,10 +13,10 @@ lib:
 	cp -f $(DUNE_BUILD_PATH)/ocamljl/stdlib/ocamljl_stdlib.jl $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.h $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.jl $(GENERATED_PATH)
-ifeq ($(OS),Linux) 
+ifeq ($(OS),Linux)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
 endif
-ifeq ($(OS),OSX) 
+ifeq ($(OS),Darwin)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.dylib $(GENERATED_PATH)
 endif
 
