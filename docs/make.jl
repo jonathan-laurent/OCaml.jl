@@ -1,6 +1,6 @@
 using Documenter
 
-ENV["OCAML_LIB_DIR"] = "_build/default/examples/libocaml"
+ENV["OCAML_LIB_DIR"] = "examples/generated"
 using OCaml
 
 const PRETTY_URLS = get(ENV, "CI", nothing) == "true"
