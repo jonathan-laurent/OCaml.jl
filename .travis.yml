@@ -1,6 +1,6 @@
 language: julia
-os:
-  - linux
+os: linux
+dist: bionic
 julia:
   - 1.4.1
 
