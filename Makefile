@@ -9,6 +9,7 @@ lib:
 	mkdir $(GENERATED_PATH) || true
 	cp -f $(DUNE_BUILD_PATH)/ocamljl/base/ocamljl_base.h $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/ocamljl/stdlib/ocamljl_stdlib.h $(GENERATED_PATH)
+	cp -f $(DUNE_BUILD_PATH)/ocamljl/stdlib/ocamljl_stdlib.jl $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.h $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.jl $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
