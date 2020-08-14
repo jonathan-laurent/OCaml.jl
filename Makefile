@@ -2,6 +2,15 @@ OCAML_LIB_PATH=$(shell ocamlopt -where)
 DUNE_BUILD_PATH=_build/default
 GENERATED_PATH=generated
 
+OS=$(shell uname)
+
+ifeq ($(UNAME), Linux)
+# do something Linux-y
+endif
+ifeq ($(UNAME), Solaris)
+# do something Solaris-y
+endif
+
 .PHONY: lib testc testjl clean
 
 lib:
@@ -12,15 +21,19 @@ lib:
 	cp -f $(DUNE_BUILD_PATH)/ocamljl/stdlib/ocamljl_stdlib.jl $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.h $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.jl $(GENERATED_PATH)
-	-cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.dylib $(GENERATED_PATH)
-	-cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
+ifeq ($(OS),Linux) 
+	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
+endif
+ifeq ($(OS),OSX) 
+	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.dylib $(GENERATED_PATH)
+endif
 
 testc: lib
 	$(CC) -I $(GENERATED_PATH) -I $(OCAML_LIB_PATH) \
-				-L $(GENERATED_PATH) \
-	    	-Wl,--no-as-needed -ldl -lm \
-				-locaml \
-				examples/client.c
+	      -L $(GENERATED_PATH) \
+	      -Wl,--no-as-needed -ldl -lm \
+	      -locaml \
+	      examples/client.c
 	LD_LIBRARY_PATH=$(GENERATED_PATH) ./a.out
 
 testjl: lib
