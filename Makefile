@@ -12,7 +12,8 @@ lib:
 	cp -f $(DUNE_BUILD_PATH)/ocamljl/stdlib/ocamljl_stdlib.jl $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.h $(GENERATED_PATH)
 	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/ocamljl_examples.jl $(GENERATED_PATH)
-	cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
+	-cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.dylib $(GENERATED_PATH)
+	-cp -f $(DUNE_BUILD_PATH)/examples/libocaml/libocaml.so $(GENERATED_PATH)
 
 testc: lib
 	$(CC) -I $(GENERATED_PATH) -I $(OCAML_LIB_PATH) \
