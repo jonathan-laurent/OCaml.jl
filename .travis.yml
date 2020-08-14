@@ -9,7 +9,8 @@ notifications:
 
 script: julia --project -e '
   using Pkg;
-  Pkg.build();'
+  Pkg.build();
+  Pkg.test()'
 
 jobs:
   include:
