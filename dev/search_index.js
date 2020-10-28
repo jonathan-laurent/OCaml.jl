@@ -1,3 +1,3 @@
 var documenterSearchIndex = {"docs":
-[]
+[{"location":"#OCaml.jl-Documentation","page":"Home","title":"OCaml.jl Documentation","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"This package enables you to generate Julia bindings for OCaml libraries with no boilerplate.","category":"page"},{"location":"#How-to-build-and-run-the-example","page":"Home","title":"How to build and run the example","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"In order to ","category":"page"},{"location":"#How-to-use-in-your-own-project","page":"Home","title":"How to use in your own project","text":"","category":"section"},{"location":"","page":"Home","title":"Home","text":"For now, we advise adding this repo as a git submodule in your project.","category":"page"}]
 }
